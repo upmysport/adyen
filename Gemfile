@@ -4,3 +4,12 @@ source 'https://rubygems.org'
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.
 gemspec
+
+platform :rbx do 
+  gem 'rubysl'
+  gem 'racc'
+end
+
+platform :jruby do
+  gem 'jruby-openssl'
+end

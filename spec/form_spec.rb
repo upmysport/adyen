@@ -129,6 +129,7 @@ describe Adyen::Form do
   end
 
   describe 'hidden fields generation' do
+    include APISpecHelper
     subject { %Q'<form action="#{CGI.escapeHTML(Adyen::Form.url)}" method="post">#{Adyen::Form.hidden_fields(@attributes)}</form>' }
 
     before(:each) do
@@ -137,7 +138,10 @@ describe Adyen::Form do
         :session_validity => Time.now + 3600 }
     end
 
-    it { should have_adyen_payment_form }
+    for_each_xml_backend do
+      it { should have_adyen_payment_form }
+    end
+
     it { should include('<input type="hidden" name="merchantAccount" value="TestMerchant" />') }
 
     context "width default_form_params" do
@@ -162,12 +166,18 @@ describe Adyen::Form do
         :ship_before_date => '2007-10-20', :merchant_reference => 'Internet Order 12345',
         :skin => :testing, :session_validity => '2007-10-11T11:00:00Z',
         :billing_address => {
-           :street               => 'Alexanderplatz',
-           :house_number_or_name => '0815',
-           :city                 => 'Berlin',
-           :postal_code          => '10119',
-           :state_or_province    => 'Berlin',
-           :country              => 'Germany',
+            :street               => 'Alexanderplatz',
+            :house_number_or_name => '0815',
+            :city                 => 'Berlin',
+            :postal_code          => '10119',
+            :state_or_province    => 'Berlin',
+            :country              => 'Germany',
+          },
+        :shopper => {
+            :telephone_number       => '1234512345',
+            :first_name             => 'John',
+            :last_name              => 'Doe',
+            :social_security_number => '123-45-1234'
           }
         }
 
@@ -180,7 +190,6 @@ describe Adyen::Form do
 
       signature_string = Adyen::Signature.calculate_signature_string(@parameters.merge(:merchant_return_data => 'testing123'))
       signature_string.should == "10000GBP2007-10-20Internet Order 123454aD37dJATestMerchant2007-10-11T11:00:00Ztesting123"
-
     end
 
     it "should calculate the signature correctly" do
@@ -229,6 +238,28 @@ describe Adyen::Form do
           signature = Adyen::Form.calculate_billing_address_signature(@parameters)
         end.to raise_error ArgumentError
       end
+
+    end
+
+    context 'shopper' do
+
+      it "should construct the signature base string correctly" do
+        signature_string = Adyen::Form.calculate_shopper_signature_string(@parameters[:shopper])
+        signature_string.should == "JohnDoe1234512345"
+      end
+
+      it "should calculate the signature correctly" do
+        signature = Adyen::Form.calculate_shopper_signature(@parameters)
+        signature.should == 'rb2GEs1kGKuLh255a3QRPBYXmsQ='
+      end
+
+      it "should raise ArgumentError on empty shared_secret" do
+        expect do
+          @parameters.delete(:shared_secret)
+          signature = Adyen::Form.calculate_shopper_signature(@parameters)
+        end.to raise_error ArgumentError
+      end
+
     end
 
   end
