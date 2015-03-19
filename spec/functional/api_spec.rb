@@ -104,6 +104,22 @@ if File.exist?(API_SPEC_INITIALIZER)
     #   response.should be_success
     #   response.should be_disabled
     # end
+
+    it "store bank details" do
+      response = Adyen::API.store_bank_detail(
+        { :email => "#{@user_id}@example.com",
+          :reference => @user_id
+        },
+        {
+          :iban => "NL48RABO0132394782",
+          :bic => "RABONL2U",
+          :bank_name => 'Rabobank',
+          :country_code => 'NL',
+          :owner_name => 'Test Shopper'
+        }
+      )
+      response.should be_success
+    end
   end
 
 else
