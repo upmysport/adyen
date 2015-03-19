@@ -381,7 +381,7 @@ module Adyen
     #  response.detail_stored?             # => true
     #
     #  Now we can access the stored recurring_detail_reference to future Payouts
-    # 
+    #
     #  response.psp_reference              # => "8814223560182875"
     #  response.recurring_detail_reference # => "8914234560182875"
     #  response.result_code                # => "success"
@@ -402,6 +402,36 @@ module Adyen
         :bank    => bank
       }
       PayoutService.new(params).store_detail
+    end
+
+    # Submit a Payout payment
+    #
+    # @example
+    # response = Adyen::API.payout(
+    #   :reference => 'PayoutPayment-0001'
+    #   {
+    #     :currency => 'EUR',
+    #     :value => invoice.amount
+    #   },
+    #   {
+    #     :email => user.email
+    #     :reference => user.id
+    #   },
+    #   selected_recurring_detail_reference
+    # )
+    # response.received? # => true
+    #
+    # response.psp_reference  # => '9913140798220028'
+    # response.refusal_reason # =>  nil
+    # response.result_code    # => '[payout-submit-received]'
+    def submit_payout(reference, amount, shopper, selected_recurring_detail_reference)
+      params = {
+        :reference => reference,
+        :amount => amount,
+        :shopper => shopper,
+        :selected_recurring_detail_reference => selected_recurring_detail_reference
+      }
+      PayoutService.new(params).submit
     end
   end
 end

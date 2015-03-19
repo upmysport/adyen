@@ -37,18 +37,31 @@ module Adyen
         call_webservice_action('storeDetail', store_detail_request_body, StoreDetailResponse)
       end
 
+      # @see API.submit_payout
+      def submit
+        call_webservice_action('submit', submit_request_body, SubmitResponse)
+      end
+
       private
+
+      def submit_request_body
+        content = amount_partial
+        content << reference_partial
+        content << recurring_detail_reference_partial
+        content << ENABLE_RECURRING_PAYOUT_CONTRACT_PARTIAL
+        payout_request_body(content, 'submit')
+      end
 
       def store_detail_request_body
         content = bank_partial
         content << ENABLE_RECURRING_PAYOUT_CONTRACT_PARTIAL
-        payout_request_body(content)
+        payout_request_body(content, 'storeDetail')
       end
 
-      def payout_request_body(content)
+      def payout_request_body(content, method)
         validate_parameters!(:merchant_account)
         content << shopper_partial
-        LAYOUT % [@params[:merchant_account], content]
+        LAYOUT % [method, @params[:merchant_account], content, method]
       end
 
       def bank_partial
@@ -60,6 +73,24 @@ module Adyen
       def shopper_partial
         validate_parameters!(:shopper => [:email, :reference])
         @params[:shopper].map { |k, v| SHOPPER_PARTIALS[k] % v }.join("\n")
+      end
+
+      def reference_partial
+        validate_parameters!(:reference)
+        reference = @params[:reference]
+        REFERENCE_PARTIAL % reference
+      end
+
+      def recurring_detail_reference_partial
+        validate_parameters!(:selected_recurring_detail_reference)
+        recurring_detail = @params[:selected_recurring_detail_reference]
+        RECURRING_DETAIL_REFERENCE_PARTIAL % recurring_detail
+      end
+
+      def amount_partial
+        validate_parameters!(:amount => [:currency, :value])
+        amount = @params[:amount].values_at(:currency, :value)
+        AMOUNT_PARTIAL % amount
       end
 
       class StoreDetailResponse < Response
@@ -84,11 +115,6 @@ module Adyen
         end
 
         alias_method :detail_stored?, :success?
-
-        # @return [Boolean] Returns whether or not the request was valid.
-        def invalid_request?
-          !fault_message.nil?
-        end
 
         # In the case of a validation error, or SOAP fault message, this method will return an
         # array describing what attribute failed validation and the accompanying message. If the
@@ -119,6 +145,30 @@ module Adyen
               :refusal_reason => (invalid_request? ? fault_message : '')
             }
           end
+        end
+      end
+
+      class SubmitResponse < Response
+        BASE_XPATH = '//payout:submitResponse/payout:response'
+
+        response_attrs :psp_reference, :refusal_reason, :result_code
+
+        def params
+          @params ||= xml_querier.xpath(BASE_XPATH) do |result|
+            {
+              :psp_reference              => result.text('./payout:pspReference'),
+              :refusal_reason             => result.text('./payout:refusalReason'),
+              :result_code                => result.text('./payout:resultCode'),
+            }
+          end
+        end
+
+        def received?
+          params[:result_code] == '[payout-submit-received]'
+        end
+
+        def success?
+          super && received?
         end
       end
     end

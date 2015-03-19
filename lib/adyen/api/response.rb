@@ -56,6 +56,12 @@ module Adyen
           message unless message.empty?
         end
       end
+
+      # @return [Boolean] Returns whether or not the request was valid.
+      def invalid_request?
+        !fault_message.nil?
+      end
+
     end
   end
 end

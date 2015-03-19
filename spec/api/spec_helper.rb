@@ -471,3 +471,39 @@ STORE_DETAIL_INVALID_RESPONSE = <<EOS
   </soap:Body>
 </soap:Envelope>
 EOS
+
+SUBMIT_PAYOUT_RESPONSE = <<EOS
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <soap:Body>
+    <ns1:submitResponse xmlns:ns1="http://payout.services.adyen.com">
+      <ns1:response>
+        <pspReference xmlns="http://payout.services.adyen.com">9913140798220028</pspReference>
+        <refusalReason xmlns="http://payout.services.adyen.com" xsi:nil="true"/>
+        <resultCode xmlns="http://payout.services.adyen.com">
+          [payout-submit-received]</resultCode>
+      </ns1:response>
+    </ns1:submitResponse>
+  </soap:Body>
+</soap:Envelope>
+EOS
+
+SUBMIT_PAYOUT_INVALID_RESPONSE = <<EOS
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns0="http://common.services.adyen.com" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <soap:Body>
+      <soap:Fault>
+         <faultcode>soap:Client</faultcode>
+         <faultstring>security 010 Not allowed</faultstring>
+         <detail>
+            <ns0:errorCode>010</ns0:errorCode>
+            <ns0:errorType>security</ns0:errorType>
+            <ns0:message>Not allowed</ns0:message>
+         </detail>
+      </soap:Fault>
+   </soap:Body>
+</soap:Envelope>
+EOS
+
