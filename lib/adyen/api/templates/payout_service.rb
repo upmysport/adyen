@@ -3,12 +3,12 @@ module Adyen
     class PayoutService < SimpleSOAPClient
       # @private
       LAYOUT = <<EOS
-<storeDetail xmlns="http://payout.services.adyen.com">
+<%s xmlns="http://payout.services.adyen.com">
   <request>
     <merchantAccount>%s</merchantAccount>
     %s
     </request>
-</storeDetail>
+</%s>
 EOS
 
       # @private
@@ -34,6 +34,24 @@ EOS
         :reference => '<shopperReference>%s</shopperReference>',
         :email     => '<shopperEmail>%s</shopperEmail>'
       }
+
+      # @private
+      AMOUNT_PARTIAL = <<EOS
+<amount>
+  <currency xmlns="http://common.services.adyen.com">%s</currency>
+  <value xmlns="http://common.services.adyen.com">%s</value>
+</amount>
+EOS
+#
+      # @private
+      REFERENCE_PARTIAL = <<EOS
+<reference>%s</reference>
+EOS
+#
+      # @private
+      RECURRING_DETAIL_REFERENCE_PARTIAL = <<EOS
+<selectedRecurringDetailReference>%s</selectedRecurringDetailReference>
+EOS
     end
   end
 end
