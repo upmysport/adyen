@@ -31,6 +31,10 @@ module Adyen
     class PayoutService < SimpleSOAPClient
       # The Adyen Payout SOAP service endpoint uri.
       ENDPOINT_URI = 'https://pal-%s.adyen.com/pal/servlet/soap/Payout'
+      PAYOUT_CREDENTIALS = {
+        api_username: Adyen.configuration.payout_api_username,
+        api_password: Adyen.configuration.payout_api_password
+      }
 
       # @see API.store_detail
       def store_detail
@@ -39,7 +43,7 @@ module Adyen
 
       # @see API.submit_payout
       def submit
-        call_webservice_action('submit', submit_request_body, SubmitResponse)
+        call_webservice_action('submit', submit_request_body, SubmitResponse, PAYOUT_CREDENTIALS)
       end
 
       private
