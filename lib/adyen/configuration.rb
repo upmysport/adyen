@@ -64,11 +64,24 @@ class Adyen::Configuration
   # @return [String]
   attr_accessor :api_username
 
+
+  # The username that’s used to authenticate for the Adyen Payout SOAP services. It should look
+  # something like ‘+ws@AndyInc.SuperShop+’
+  #
+  # @return [String]
+  attr_accessor :payout_api_username
+
   # The password that’s used to authenticate for the Adyen SOAP services. You can configure it
   # in the user management tool of the merchant area.
   #
   # @return [String]
   attr_accessor :api_password
+
+  # The password that’s used to authenticate for the Adyen Payout SOAP services. You can configure it
+  # in the user management tool of the merchant area.
+  #
+  # @return [String]
+  attr_accessor :payout_api_password
 
   # Default arguments that will be used for every API call. You can override these default
   # values by passing a diffferent value to the service class’s constructor.
