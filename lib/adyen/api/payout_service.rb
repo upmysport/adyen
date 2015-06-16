@@ -39,10 +39,17 @@ module Adyen
 
       # @see API.submit_payout
       def submit
-        call_webservice_action('submit', submit_request_body, SubmitResponse)
+        call_webservice_action('submit', submit_request_body, SubmitResponse, payout_credentials)
       end
 
       private
+
+      def payout_credentials
+        @payout_credentials ||= {
+          api_username: Adyen.configuration.payout_api_username,
+          api_password: Adyen.configuration.payout_api_password
+        }
+      end
 
       def submit_request_body
         content = amount_partial
